@@ -133,25 +133,9 @@
         window.dataLayer = window.dataLayer || [];
 
     </script>
-
-    <style>
-        atomic-external>atomic-search-box {
-            width: 165px;
-            margin: auto;
-        }
-    </style>
-</head>
-
-<body>
-    <!-- Google Tag Manager (noscript) -->
-    <noscript>
-        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M5ZB79RR" height="0" width="0"
-            style="display:none;visibility:hidden"></iframe>
-    </noscript>
-
-    <atomic-hosted-page id="searchpage"></atomic-hosted-page>
-
     <script>
+
+
         (async () => {
             await customElements.whenDefined("atomic-hosted-page");
 
@@ -170,30 +154,41 @@
 
                 analytics: {
                     analyticsClientMiddleware: (eventName, payload) => {
-                        if (payload.actionCause === 'documentOpen') {
-                            const matchingResult = headlessEngine.state.search.results;
-                            console.log(matchingResult);
-                            payload.customData['intent'] = matchingResult.raw['docsintent'];
-                        }
-
-                        // Trigger the eventName to GTM
+                        // Push to the dataLayer for GTM here
                         window.dataLayer.push({
                             'event': 'coveoEvent',
-                            'eventName': eventName, // send the eventName
-                            // if you have other data you want to send, add it here.
+                            'eventType': eventName,
+                            'eventData': payload
                         });
 
-                        return payload; // return the modified payload
+                        // ... (Rest of your analytics logic) ...
+
+                        return payload;
                     }
                 }
-
-
-
-
             });
         })();
-
     </script>
+    <style>
+        atomic-external>atomic-search-box {
+            width: 165px;
+            margin: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M5ZB79RR" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe>
+    </noscript>
+
+    <atomic-hosted-page id="searchpage"></atomic-hosted-page>
+
+
+
+
 </body>
 
 </html>
