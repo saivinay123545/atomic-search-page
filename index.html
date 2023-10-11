@@ -10,7 +10,7 @@
 
     <script type="text/javascript" src="https://static.cloud.coveo.com/coveo.analytics.js/2/coveoua.js">
     </script>
-    <script>
+    <!-- <script>
         function extractQueryValueFromURL(url) {
             const urlParams = new URLSearchParams(url.split("#")[1]);
             const qValue = urlParams.get("q");
@@ -113,23 +113,23 @@
         }
         sendAnalyticsTrigger()
 
-    </script>
+    </script> -->
 
     <!-- Google Tag Manager Initialization -->
     <script>
-            (function (w, d, s, l, i) {
-                w[l] = w[l] || [];
-                w[l].push({
-                    'gtm.start': new Date().getTime(),
-                    event: 'gtm.js'
-                });
-                var f = d.getElementsByTagName(s)[0],
-                    j = d.createElement(s),
-                    dl = l != 'dataLayer' ? '&l=' + l : '';
-                j.async = true;
-                j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
-                f.parentNode.insertBefore(j, f);
-            })(window, document, 'script', 'dataLayer', 'GTM-M5ZB79RR');
+        (function (w, d, s, l, i) {
+            w[l] = w[l] || [];
+            w[l].push({
+                'gtm.start': new Date().getTime(),
+                event: 'gtm.js'
+            });
+            var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s),
+                dl = l != 'dataLayer' ? '&l=' + l : '';
+            j.async = true;
+            j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+            f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-M5ZB79RR');
         window.dataLayer = window.dataLayer || [];
 
     </script>
@@ -161,11 +161,13 @@
                 organizationId: 'webscraping0dry4ija',
             }
             const page_s = document.querySelector('#searchpage');
+
             await page_s.initialize({
                 pageId: pageOptions_s.pageId,
                 accessToken: pageOptions_s.accessToken,
                 organizationId: pageOptions_s.organizationId,
                 organizationEndpoints: await page_s.getOrganizationEndpoints(pageOptions_s.organizationId, ''),
+
                 analytics: {
                     analyticsClientMiddleware: (eventName, payload) => {
                         if (payload.actionCause === 'documentOpen') {
@@ -173,9 +175,18 @@
                             console.log(matchingResult);
                             payload.customData['intent'] = matchingResult.raw['docsintent'];
                         }
-                        return payload;
+
+                        // Trigger the eventName to GTM
+                        window.dataLayer.push({
+                            'event': 'coveoEvent',
+                            'eventName': eventName, // send the eventName
+                            // if you have other data you want to send, add it here.
+                        });
+
+                        return payload; // return the modified payload
                     }
                 }
+
 
 
 
