@@ -41,11 +41,8 @@
             });
 
             const clickAnalytics = JSON.stringify({
-                actionCause: "documentOpen",
-                documentPosition: docPosition,
-                sourceName: srcName,
-                documentTitle: title,
-                documentUrl: uri,
+                sourceName: "AnswersCloud",
+                documentPosition: 1,
                 ...commonBody,
             });
 
@@ -175,8 +172,6 @@
                             const matchingResult = headlessEngine.state.search.results;
                             console.log(matchingResult);
                             payload.customData['intent'] = matchingResult.raw['docsintent'];
-
-
                         }
                         return payload;
                     }
