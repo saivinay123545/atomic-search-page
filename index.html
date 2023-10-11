@@ -24,7 +24,7 @@
                 "Authorization",
                 "Bearer xx7c6c6863-cc14-4c77-8caf-ee58823e617d"
             );
-            myHeaders.append("Cookie", "visitor=cb56467f-e213-4baf-8413-76702dbd5ffa");
+            myHeaders.append("Cookie", "visitor=7a7a8de0-5aab-48b9-b396-ff2024f60a62");
 
             const commonBody = {
                 actionCause: "onload",
@@ -41,8 +41,11 @@
             });
 
             const clickAnalytics = JSON.stringify({
-                sourceName: "AnswersCloud",
-                documentPosition: 1,
+                actionCause: "documentOpen",
+                documentPosition: docPosition,
+                sourceName: srcName,
+                documentTitle: title,
+                documentUrl: uri,
                 ...commonBody,
             });
 
@@ -69,6 +72,7 @@
                         'eventData': {
                             'UUID': UUID,
                             'queryText': extractQueryValueFromURL(window.location.href),
+                            'clickResult': clickAnalytics,
                             'responseTime': 150,
                         }
                     })
@@ -172,6 +176,16 @@
                             const matchingResult = headlessEngine.state.search.results;
                             console.log(matchingResult);
                             payload.customData['intent'] = matchingResult.raw['docsintent'];
+
+                            window.dataLayer.push({
+                                'event': 'coveoClickEvent',
+                                'clickData': {
+                                    'title': matchingResult.title,
+                                    'URL': matchingResult.clickUri,
+                                    'intent': matchingResult.raw['docsintent']
+                                    // ... add other necessary data fields as needed
+                                }
+                            });
                         }
                         return payload;
                     }
