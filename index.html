@@ -155,10 +155,9 @@
                 analytics: {
                     analyticsClientMiddleware: (eventName, payload) => {
                         // Push to the dataLayer for GTM here
-                        dataLayer.push({
-                            'event': 'coveoEvent',
-                            'eventType': eventName,
-                            'eventData': payload
+                        window.dataLayer = window.dataLayer || [];
+                        window.dataLayer.push({
+                            'event': 'registrationComplete'
                         });
 
                         // ... (Rest of your analytics logic) ...
