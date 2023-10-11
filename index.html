@@ -4,22 +4,154 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
-    <title>cirrent_global_search</title>
+    <title>GTM</title>
     <script type="module"
         src="https://static.cloud.coveo.com/atomic-hosted-page/v0/atomic-hosted-page/atomic-hosted-page.esm.js"></script>
-    <!-- Google Tag Manager -->
-    <script>(function (w, d, s, l, i) {
-            w[l] = w[l] || []; w[l].push({
-                'gtm.start':
-                    new Date().getTime(), event: 'gtm.js'
-            }); var f = d.getElementsByTagName(s)[0],
-                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
-                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
-        })(window, document, 'script', 'dataLayer', 'GTM-M5ZB79RR');</script>
-    <!-- End Google Tag Manager -->
+
+    <script type="text/javascript" src="https://static.cloud.coveo.com/coveo.analytics.js/2/coveoua.js">
+    </script>
     <script>
+        function extractQueryValueFromURL(url) {
+            const urlParams = new URLSearchParams(url.split("#")[1]);
+            const qValue = urlParams.get("q");
+            return qValue;
+        }
+        const sendAnalytics = (UUID, type) => {
+            const myHeaders = new Headers();
+            myHeaders.append("Accept", "application/json");
+            myHeaders.append("Content-Type", "application/json");
+            myHeaders.append(
+                "Authorization",
+                "Bearer xx7c6c6863-cc14-4c77-8caf-ee58823e617d"
+            );
+            myHeaders.append("Cookie", "visitor=cb56467f-e213-4baf-8413-76702dbd5ffa");
+
+            const commonBody = {
+                actionCause: "onload",
+                language: "en",
+                anonymous: false,
+                clientId: `${localStorage.getItem("visitorId")}`,
+                searchQueryUid: UUID,
+            };
+
+            const facetSelectAnalytics = JSON.stringify({
+                queryText: extractQueryValueFromURL(window.location.href),
+                responseTime: 150,
+                ...commonBody,
+            });
+
+            const clickAnalytics = JSON.stringify({
+                sourceName: "AnswersCloud",
+                documentPosition: 1,
+                ...commonBody,
+            });
+
+            const requestOptions = {
+                method: "POST",
+                headers: myHeaders,
+                body: type === "click" ? clickAnalytics : facetSelectAnalytics,
+                redirect: "follow",
+            };
+
+            const endpoint = type === "click" ? "click" : "search";
+
+            fetch(
+                `https://webscraping0dry4ija.analytics.org.coveo.com/rest/ua/v15/analytics/${endpoint}`,
+                requestOptions
+            )
+                .then((response) => response.text())
+                .then((result) =>
+                    console.log(`Analytics sent for ${type}`, result),
+
+                    window.dataLayer.push({
+                        'event': 'coveoEvent',
+                        'eventType': type,
+                        'eventData': {
+                            'UUID': UUID,
+                            'queryText': extractQueryValueFromURL(window.location.href),
+                            'responseTime': 150,
+                        }
+                    })
+                )
+                .catch((error) => console.log("error", error));
+        };
 
 
+
+
+        const sendAnalyticsTrigger = () => {
+            var myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            myHeaders.append("Authorization", "Bearer xxc58a638f-c71d-480b-8c89-5c78583332b0");
+            myHeaders.append("Accept", "application/json");
+
+
+
+            var raw = JSON.stringify({
+                "field": "click",
+                "numberOfValues": 100,
+                "query": `*${extractQueryValueFromURL(window.location.href)}*`
+            });
+
+
+
+            var requestOptions = {
+                method: 'POST',
+                headers: myHeaders,
+                body: raw,
+                redirect: 'follow'
+            };
+
+
+
+            fetch("https://webscraping0dry4ija.org.coveo.com/rest/search/v2", requestOptions)
+                .then(response => response.text())
+                .then(result =>
+                    sendAnalytics(JSON.parse(result).searchUid, 'search')
+                )
+                .catch(error => console.log('error', error));
+        }
+        sendAnalyticsTrigger()
+
+    </script>
+
+    <!-- Google Tag Manager Initialization -->
+    <script>
+            (function (w, d, s, l, i) {
+                w[l] = w[l] || [];
+                w[l].push({
+                    'gtm.start': new Date().getTime(),
+                    event: 'gtm.js'
+                });
+                var f = d.getElementsByTagName(s)[0],
+                    j = d.createElement(s),
+                    dl = l != 'dataLayer' ? '&l=' + l : '';
+                j.async = true;
+                j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+                f.parentNode.insertBefore(j, f);
+            })(window, document, 'script', 'dataLayer', 'GTM-M5ZB79RR');
+        window.dataLayer = window.dataLayer || [];
+
+    </script>
+
+    <style>
+        atomic-external>atomic-search-box {
+            width: 165px;
+            margin: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M5ZB79RR" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe>
+    </noscript>
+
+    <atomic-hosted-page id="searchpage"></atomic-hosted-page>
+
+    <script>
         (async () => {
             await customElements.whenDefined("atomic-hosted-page");
 
@@ -33,26 +165,24 @@
                 pageId: pageOptions_s.pageId,
                 accessToken: pageOptions_s.accessToken,
                 organizationId: pageOptions_s.organizationId,
-                organizationEndpoints: await page_s.getOrganizationEndpoints(pageOptions_s.organizationId, '')
+                organizationEndpoints: await page_s.getOrganizationEndpoints(pageOptions_s.organizationId, ''),
+                analytics: {
+                    analyticsClientMiddleware: (eventName, payload) => {
+                        if (payload.actionCause === 'documentOpen') {
+                            const matchingResult = headlessEngine.state.search.results;
+                            console.log(matchingResult);
+                            payload.customData['intent'] = matchingResult.raw['docsintent'];
+                        }
+                        return payload;
+                    }
+                }
+
+
+
             });
         })();
+
     </script>
-    <style>
-        atomic-external>atomic-search-box {
-            width: 165px;
-            margin: auto;
-        }
-    </style>
-</head>
-
-<body>
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M5ZB79RR" height="0" width="0"
-            style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
-
-    <atomic-hosted-page id="searchpage"></atomic-hosted-page>
-
 </body>
 
 </html>
