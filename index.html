@@ -72,7 +72,6 @@
                         'eventData': {
                             'UUID': UUID,
                             'queryText': extractQueryValueFromURL(window.location.href),
-                            'clickResult': clickAnalytics,
                             'responseTime': 150,
                         }
                     })
@@ -177,15 +176,7 @@
                             console.log(matchingResult);
                             payload.customData['intent'] = matchingResult.raw['docsintent'];
 
-                            window.dataLayer.push({
-                                'event': 'coveoClickEvent',
-                                'clickData': {
-                                    'title': matchingResult.title,
-                                    'URL': matchingResult.clickUri,
-                                    'intent': matchingResult.raw['docsintent']
-                                    // ... add other necessary data fields as needed
-                                }
-                            });
+
                         }
                         return payload;
                     }
