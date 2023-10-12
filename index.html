@@ -27,43 +27,56 @@
             j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
             f.parentNode.insertBefore(j, f);
         })(window, document, 'script', 'dataLayer', 'GTM-M5ZB79RR');
-        window.dataLayer = window.dataLayer || [];
 
     </script>
 
     <script>
-        const pushToGoogleDataLayer = (payload) => {
-            dataLayer.push({
-                "event": "coveoEvent"
-            })
-        }
 
-        (async () => {
-            await customElements.whenDefined("atomic-hosted-page");
+        window.dataLayer.push({
 
-            const pageOptions_s = {
-                pageId: '48f41ff4-4765-4d4c-8a20-0979bc1764a5',
-                accessToken: 'xx7c6c6863-cc14-4c77-8caf-ee58823e617d',
-                organizationId: 'webscraping0dry4ija',
-            }
-            const page_s = document.querySelector('#searchpage');
+            "event": "coveoEvent",
 
-            await page_s.initialize({
-                pageId: pageOptions_s.pageId,
-                accessToken: pageOptions_s.accessToken,
-                organizationId: pageOptions_s.organizationId,
-                organizationEndpoints: await page_s.getOrganizationEndpoints(pageOptions_s.organizationId, ''),
-
-                analytics: {
-                    analyticsClientMiddleware: (eventType, payload) => {
-                        pushToGoogleDataLayer(payload);
-                        return payload;
-                    },
- }
-            });
-        })();
+        })
     </script>
+
+    <script>
+
+            // const pushToGoogleDataLayer = (payload) => {
+            // debugger;
+
+            // const externalurl = window.location.href
+            // console.log(externalurl);
+            // }
+
+            (async () => {
+                await customElements.whenDefined("atomic-hosted-page");
+
+                const pageOptions_s = {
+                    pageId: '48f41ff4-4765-4d4c-8a20-0979bc1764a5',
+                    accessToken: 'xx7c6c6863-cc14-4c77-8caf-ee58823e617d',
+                    organizationId: 'webscraping0dry4ija',
+                }
+                const page_s = document.querySelector('#searchpage');
+
+                await page_s.initialize({
+                    pageId: pageOptions_s.pageId,
+                    accessToken: pageOptions_s.accessToken,
+                    organizationId: pageOptions_s.organizationId,
+                    organizationEndpoints: await page_s.getOrganizationEndpoints(pageOptions_s.organizationId, ''),
+
+                    analytics: {
+                        analyticsClientMiddleware: (eventType, payload) => {
+                            pushToGoogleDataLayer(payload);
+                            return payload;
+                        },
+                    }
+                });
+            })();
+    </script>
+
+
 </head>
+
 <body>
     <!-- Google Tag Manager (noscript) -->
     <noscript>
@@ -72,6 +85,10 @@
     </noscript>
 
     <atomic-hosted-page id="searchpage"></atomic-hosted-page>
+
+
+
+
 </body>
 
 </html>
