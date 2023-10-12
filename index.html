@@ -27,27 +27,45 @@
             j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
             f.parentNode.insertBefore(j, f);
         })(window, document, 'script', 'dataLayer', 'GTM-M5ZB79RR');
-
-    </script>
-
-    <script>
-
+        /*
         window.dataLayer.push({
 
             "event": "coveoEvent",
             "color": "red"
 
         })
-    </script>
-
-    <script>
-
+        */
             // const pushToGoogleDataLayer = (payload) => {
             // debugger;
 
             // const externalurl = window.location.href
             // console.log(externalurl);
             // }
+            var counter = false;
+            function pushToGoogleDataLayer(payload){
+                    var payLoadValue =  payload.actionCause;
+                    if (payLoadValue === 'searchboxSubmit'|| payLoadValue === 'omniboxAnalytics') {
+                      window.dataLayer = window.dataLayer || [];
+                      window.dataLayer.push({
+                        event: 'search',
+                        searchType: 'cross Search',
+                        searchCategory: ""
+                    });
+                }
+            }
+            const analyticsClientMiddleware = (eventName, payload) => {
+                counterCheck();
+                //To avoid duplicate datalayer function call 
+                function counterCheck(){
+                  if (payload.actionCause === "documentOpen") 
+                  counter = true;
+                  if (counter === true){
+                    counter = false;
+                    pushToGoogleDataLayer(payload);                              
+                  }               
+                }                   
+                return payload;        
+              }
 
             (async () => {
                 await customElements.whenDefined("atomic-hosted-page");
