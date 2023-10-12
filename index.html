@@ -38,7 +38,7 @@
         }
         function setExpression(engine) {
             const action = loadAdvancedSearchQueryActions(engine).updateAdvancedSearchQueries({
-                //aq: '@source="Infineon Khoros Community - SmartConX"',
+                // aq: '@source="Infineon Khoros Community - SmartConX"',
                 //cq: '@foldingcollection="5170d6271e0fbe6a10c1f5a35694a183351530378af6f8cecf2388fccaee"',
             });
             engine.dispatch(action);
@@ -59,12 +59,14 @@
                     //eventSourceLabel: document.getElementById("search-material-component").getAttribute("event_source_label"),
                     //searchTerm: query,
                     //searchResults: totalResults,
+                    searchterm: payload.queryText,
                     searchType: 'Material Search',
                     searchCategory: ""
                 });
             }
         }
         const analyticsClientMiddleware = (eventName, payload) => {
+            // console.log("payload", payload.queryText)
             counterCheck();
             //To avoid duplicate datalayer function call 
             function counterCheck() {
@@ -309,4 +311,5 @@
         </atomic-search-layout>
     </atomic-search-interface>
 </body>
+
 </html>
