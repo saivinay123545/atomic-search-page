@@ -33,15 +33,9 @@
 
     <script>
         const pushToGoogleDataLayer = (payload) => {
-            {
-                event = "coveoEvent",
-                    gtm = {
-                        uniqueEventId: 1,
-                        Id: 2
-
-                    }
-
-            }
+            dataLayer.push({
+                "event": "coveoEvent"
+            })
         }
 
         (async () => {
@@ -65,14 +59,11 @@
                         pushToGoogleDataLayer(payload);
                         return payload;
                     },
-                }
+ }
             });
         })();
     </script>
-
-
 </head>
-
 <body>
     <!-- Google Tag Manager (noscript) -->
     <noscript>
@@ -81,10 +72,6 @@
     </noscript>
 
     <atomic-hosted-page id="searchpage"></atomic-hosted-page>
-
-
-
-
 </body>
 
 </html>
