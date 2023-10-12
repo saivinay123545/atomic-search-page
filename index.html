@@ -45,16 +45,19 @@
         var counter = false;
         function pushToGoogleDataLayer(payload) {
             var payLoadValue = payload.actionCause;
-            if (payLoadValue === 'searchboxSubmit') {
+            if (payLoadValue === 'searchboxSubmit' || payLoadValue === 'omniboxAnalytics') {
                 debugger;
                 window.dataLayer = window.dataLayer || [];
                 window.dataLayer.push({
-                    event: 'coveoSearchEvents',
+                    event: 'coveoEvents',
+
                     searchResults: payload.numberOfResults,
                     searchTerm: payload.queryText,
                     searchType: 'Cross Search',
                     searchCategory: "Cross Reference Search",
                     originLevel1: payload.originLevel1,
+
+
                 });
             }
         }
@@ -63,8 +66,8 @@
             counterCheck();
             //To avoid duplicate datalayer function call 
             function counterCheck() {
-                if (payload.actionCause === "documentOpen")
-                    debugger;
+                //if (payload.actionCause === "documentOpen")
+                debugger;
                 counter = true;
                 if (counter === true) {
                     counter = false;
