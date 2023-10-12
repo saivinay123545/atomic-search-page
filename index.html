@@ -38,33 +38,23 @@
         }
         function setExpression(engine) {
             const action = loadAdvancedSearchQueryActions(engine).updateAdvancedSearchQueries({
-                // aq: '@source="Infineon Khoros Community - SmartConX"',
-                //cq: '@foldingcollection="5170d6271e0fbe6a10c1f5a35694a183351530378af6f8cecf2388fccaee"',
+
             });
             engine.dispatch(action);
         }
         var counter = false;
         function pushToGoogleDataLayer(payload) {
             var payLoadValue = payload.actionCause;
-            //Search filter Tracking
-
-            //Search Tracking
-            if (payLoadValue === 'searchboxSubmit' || payLoadValue === 'omniboxAnalytics') {
+            if (payLoadValue === 'searchboxSubmit') {
                 debugger;
                 window.dataLayer = window.dataLayer || [];
                 window.dataLayer.push({
-                    event: 'coveoEvents',
-                    //eventLabel: query,
-                    //eventSource: document.getElementById("search-material-component").getAttribute("event_source"),
-                    //eventSourceLabel: document.getElementById("search-material-component").getAttribute("event_source_label"),
-                    //searchTerm: query,
+                    event: 'coveoSearchEvents',
                     searchResults: payload.numberOfResults,
                     searchTerm: payload.queryText,
                     searchType: 'Cross Search',
                     searchCategory: "Cross Reference Search",
                     originLevel1: payload.originLevel1,
-                    documentUrl: payload.documentUrl
-
                 });
             }
         }
