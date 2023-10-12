@@ -4,16 +4,17 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
-    <title>GTM</title>
-    <script type="module"
-        src="https://static.cloud.coveo.com/atomic-hosted-page/v0/atomic-hosted-page/atomic-hosted-page.esm.js"></script>
+    <title>Coveo Atomic With Folding</title>
+    <script type="module" src="https://static.cloud.coveo.com/atomic/v2/atomic.esm.js"></script>
+    <script type="module" src="https://unpkg.com/export-search-results"></script>
+    <link rel="stylesheet" href="https://static.cloud.coveo.com/atomic/v2/themes/coveo.css" />
+    <!--<script nomodule src="https://static.cloud.coveo.com/atomic/v2/atomic.esm.js"></script>-->
+    <script type="module" src="https://unpkg.com/custom-tab"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GTM-M5ZB79RR"></script>
+    <script type="module">
+        import { initializeBindings, resultContext } from "https://static.cloud.coveo.com/atomic/v2/index.esm.js";
+        import { buildInteractiveResult, loadContextActions, loadAdvancedSearchQueryActions } from "https://static.cloud.coveo.com/atomic/v2/headless/headless.esm.js";
 
-    <!-- <script type="text/javascript" src="https://static.cloud.coveo.com/coveo.analytics.js/2/coveoua.js"> -->
-    </script>
-
-
-    <!-- Google Tag Manager Initialization -->
-    <script>
         (function (w, d, s, l, i) {
             w[l] = w[l] || [];
             w[l].push({
@@ -27,69 +28,285 @@
             j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
             f.parentNode.insertBefore(j, f);
         })(window, document, 'script', 'dataLayer', 'GTM-M5ZB79RR');
+        function setContext(engine) {
+            const action = loadContextActions(engine).addContext({
+                contextKey: 'env',
+                //contextValue: 'preprod',
+                contextValue: 'stage',
+            });
+            engine.dispatch(action);
+        }
+        function setExpression(engine) {
+            const action = loadAdvancedSearchQueryActions(engine).updateAdvancedSearchQueries({
+                //aq: '@source="Infineon Khoros Community - SmartConX"',
+                //cq: '@foldingcollection="5170d6271e0fbe6a10c1f5a35694a183351530378af6f8cecf2388fccaee"',
+            });
+            engine.dispatch(action);
+        }
+        var counter = false;
+        function pushToGoogleDataLayer(payload) {
+            var payLoadValue = payload.actionCause;
+            //Search filter Tracking
 
-    </script>
-
-    <script>
-
-        window.dataLayer.push({
-
-            "event": "coveoEvent",
-            "color": "yellow"
-
-        })
-    </script>
-
-    <script>
-
-            // const pushToGoogleDataLayer = (payload) => {
-            // debugger;
-
-            // const externalurl = window.location.href
-            // console.log(externalurl);
-            // }
-
-            (async () => {
-                await customElements.whenDefined("atomic-hosted-page");
-
-                const pageOptions_s = {
-                    pageId: '48f41ff4-4765-4d4c-8a20-0979bc1764a5',
-                    accessToken: 'xx7c6c6863-cc14-4c77-8caf-ee58823e617d',
-                    organizationId: 'webscraping0dry4ija',
-                }
-                const page_s = document.querySelector('#searchpage');
-
-                await page_s.initialize({
-                    pageId: pageOptions_s.pageId,
-                    accessToken: pageOptions_s.accessToken,
-                    organizationId: pageOptions_s.organizationId,
-                    organizationEndpoints: await page_s.getOrganizationEndpoints(pageOptions_s.organizationId, ''),
-
-                    analytics: {
-                        analyticsClientMiddleware: (eventType, payload) => {
-                            pushToGoogleDataLayer(payload);
-                            return payload;
-                        },
-                    }
+            //Search Tracking
+            if (payLoadValue === 'searchboxSubmit' || payLoadValue === 'omniboxAnalytics') {
+                debugger;
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({
+                    event: 'search',
+                    //eventLabel: query,
+                    //eventSource: document.getElementById("search-material-component").getAttribute("event_source"),
+                    //eventSourceLabel: document.getElementById("search-material-component").getAttribute("event_source_label"),
+                    //searchTerm: query,
+                    //searchResults: totalResults,
+                    searchType: 'Material Search',
+                    searchCategory: ""
                 });
-            })();
+            }
+        }
+        const analyticsClientMiddleware = (eventName, payload) => {
+            counterCheck();
+            //To avoid duplicate datalayer function call 
+            function counterCheck() {
+                if (payload.actionCause === "documentOpen")
+                    debugger;
+                counter = true;
+                if (counter === true) {
+                    counter = false;
+                    pushToGoogleDataLayer(payload);
+                }
+            }
+            //payload.customData['context_env'] = document.getElementById("search-material-component").getAttribute("contextVal");
+            //payload.customData['context_useremail'] = userEmail;                    
+            return payload;
+        }
+
+        (async () => {
+            await customElements.whenDefined('atomic-search-interface');
+            const searchInterface = document.querySelector('atomic-search-interface');
+
+            // Initialization
+            await searchInterface.initialize({
+                accessToken: 'xx4442fd26-e820-4653-bbc2-46d1bfa4c01c',
+                organizationId: 'infineontechnologiesnonproduction1e02dtpdy',
+                organizationEndpoints: await searchInterface.getOrganizationEndpoints('infineontechnologiesnonproduction1e02dtpdy'),
+                analytics: {
+                    analyticsClientMiddleware
+                }
+            });
+
+            const engine = searchInterface.engine;
+            setExpression(engine);
+            setContext(engine);
+
+            // Trigger a first search
+            searchInterface.executeFirstSearch();
+        })();
+
+        class CoveoCustomElement extends HTMLElement {
+            shadow;
+            result;
+            initialized = false;
+
+            async connectedCallback() {
+                if (this.initialized) {
+                    return;
+                }
+
+                this.initialized = true;
+                this.shadow = this.attachShadow({ mode: "closed" });
+
+                try {
+                    this.result = await resultContext(this);
+                    this.bindings = await initializeBindings(this);
+                    this.interactiveResult = buildInteractiveResult(this.bindings.engine, {
+                        options: { result: this.result }
+                    });
+                    this.render();
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+            render() {
+                //debugger;
+                //console.log('result printing....', this.result);
+            };
+        }
+        // Recommendations tag
+        /*
+        class RecommendationsTag extends CoveoCustomElement {
+            render() {
+                try {
+                    console.log('title printing....', this.result.result.title);
+                    const isRecommended = this.result.result ? this.result.result.isRecommendation : this.result.isRecommendation;
+                    //const isRecommended = this.result.isRecommendation;
+                    //debugger;
+                    if (isRecommended || isRecommended == "true") {
+                        this.shadow.innerHTML = '<button style="background-color: #0a8276; color: #fff; padding: 4px 8px;padding-top: 6px; font-size: 12px; font-weight: 600px; letter-spacing: .2px; border: none; text-transform: uppercase; border-radius: 2px; box-sizing: border-box">' + 'Recommendation' + '</button>';
+                    }
+                } catch (err) { console.log(err) }
+            }
+        }
+        window.customElements.define("custom-recommendation-tag", RecommendationsTag);
+        */
+        window.customElements.define("coveo-custom-element", CoveoCustomElement);
+
     </script>
+    <style>
+        body {
+            margin: 0;
+        }
 
+        .header-bg {
+            background-color: var(--atomic-neutral-light);
+            grid-area: 1 / -1 / 1 / 1;
+        }
 
+        atomic-search-layout {
+            row-gap: var(--atomic-layout-spacing-y);
+        }
+
+        div#custom-tabs-container {
+            display: flex;
+        }
+    </style>
 </head>
 
 <body>
-    <!-- Google Tag Manager (noscript) -->
     <noscript>
         <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M5ZB79RR" height="0" width="0"
             style="display:none;visibility:hidden"></iframe>
     </noscript>
+    <atomic-search-interface search-hub='InfineonCommunityHub'
+        fields-to-include='["inat_kingdom", "inat_family", "inat_class", "isRecommendation"]'>
+        <atomic-search-layout>
+            <div class="header-bg"></div>
+            <atomic-layout-section section="search">
+                <atomic-search-box></atomic-search-box>
+                <!--<export-search-results></export-search-results>-->
+            </atomic-layout-section>
+            <atomic-layout-section section="facets">
+                <atomic-facet-manager>
+                    <!--<atomic-facet field="inat_kingdom" label="Kingdom"></atomic-facet>
+            <atomic-facet field="inat_family" label="Family"></atomic-facet>-->
+                    <atomic-facet field="infi_interactionboard" label="Class"></atomic-facet>
+                </atomic-facet-manager>
+            </atomic-layout-section>
+            <atomic-layout-section section="main">
+                <atomic-layout-section section="status">
+                    <atomic-breadbox></atomic-breadbox>
+                    <div class="tab-container" id="custom-tabs-container">
+                        <custom-tab class="custom-tab-element all-tab" expression="NOT@documenttype==user" label="All"
+                            is-active="true" excluded-facets="Nothing"></custom-tab>
+                        <custom-tab class="custom-tab-element forums-tab" expression="@infi_interactionboard==forum"
+                            label="Forums" excluded-facets="infi_interactionboard"></custom-tab>
+                        <custom-tab class="custom-tab-element tkb-tab" expression="@infi_interactionboard==tkb"
+                            label="Knowledge Base" excluded-facets="infi_interactionboard"></custom-tab>
+                        <custom-tab class="custom-tab-element projects-tab"
+                            expression="@infi_interactionboard==Projects" label="Projects"
+                            excluded-facets="infi_interactionboard"></custom-tab>
+                        <custom-tab class="custom-tab-element blogs-tab" expression="@infi_interactionboard==blog"
+                            label="Blogs" excluded-facets="infi_interactionboard"></custom-tab>
+                        <custom-tab class="custom-tab-element training-tab"
+                            expression="@infi_interactionboard==Training" label="Training"
+                            excluded-facets="infi_interactionboard"></custom-tab>
+                        <custom-tab class="custom-tab-element github-tab"
+                            expression="@infi_interactionboard==GitHubRepo" label="GitHub"
+                            excluded-facets="infi_interactionboard"></custom-tab>
+                        <custom-tab class="custom-tab-element products-tab"
+                            expression="@infi_interactionboard==Products" label="Products"
+                            excluded-facets="infi_interactionboard"></custom-tab>
+                        <custom-tab class="custom-tab-element users-tab" expression="@filetype==user" label="Users"
+                            excluded-facets="custom-date-range-facet"></custom-tab>
+                    </div>
+                    <atomic-query-summary></atomic-query-summary>
+                    <atomic-refine-toggle></atomic-refine-toggle>
+                    <atomic-sort-dropdown>
+                        <atomic-sort-expression label="relevance" expression="relevancy"></atomic-sort-expression>
+                        <atomic-sort-expression label="most-recent"
+                            expression="date descending"></atomic-sort-expression>
+                    </atomic-sort-dropdown>
+                    <atomic-did-you-mean></atomic-did-you-mean>
+                </atomic-layout-section>
+                <atomic-layout-section section="results">
+                    <atomic-smart-snippet></atomic-smart-snippet>
+                    <atomic-result-list image-size="small">
+                        <!-- <atomic-folded-result-list image-size="small"> -->
+                        <atomic-result-template>
+                            <template>
+                                <style>
+                                    .field {
+                                        display: inline-flex;
+                                        align-items: center;
+                                    }
 
-    <atomic-hosted-page id="searchpage"></atomic-hosted-page>
+                                    .field-label {
+                                        font-weight: bold;
+                                        margin-right: 0.25rem;
+                                    }
 
+                                    .thumbnail {
+                                        border-radius: var(--atomic-border-radius);
+                                    }
+                                </style>
+                                <atomic-result-section-visual>
+                                    <img loading="lazy" src="https://picsum.photos/seed/picsum/350" class="thumbnail" />
+                                </atomic-result-section-visual>
+                                <atomic-result-section-title>
+                                    <atomic-result-link></atomic-result-link>
+                                </atomic-result-section-title>
+                                <coveo-custom-element></coveo-custom-element>
+                                <atomic-result-section-excerpt><atomic-result-text
+                                        field="excerpt"></atomic-result-text></atomic-result-section-excerpt>
+                                <atomic-field-condition must-match-is-recommendation="true">
+                                    <atomic-result-badge label="Recommended"></atomic-result-badge>
+                                </atomic-field-condition>
+                                <!--<coveo-custom-element></coveo-custom-element>
+                  <custom-recommendation-tag></custom-recommendation-tag>-->
+                                <!-- <atomic-result-section-children>
+                    <atomic-load-more-children-results></atomic-load-more-children-results>
+                    <atomic-result-children image-size="icon">
+                      <atomic-result-children-template>
+                        <template>
+                          <style>
+                            .field {
+                              display: inline-flex;
+                              align-items: center;
+                            }
 
-
-
+                            .field-label {
+                              font-weight: bold;
+                              margin-right: 0.25rem;
+                            }
+                          </style>
+                          <atomic-result-section-visual>
+                            <img loading="lazy" src="https://picsum.photos/seed/picsum/350" class="thumbnail" />
+                          </atomic-result-section-visual>
+                          <atomic-result-section-title
+                            ><atomic-result-link></atomic-result-link
+                          ></atomic-result-section-title>
+                          <atomic-result-section-excerpt
+                            ><atomic-result-text field="excerpt"></atomic-result-text
+                          ></atomic-result-section-excerpt>
+                          <atomic-result-section-children>
+                            <atomic-result-children inherit-templates> </atomic-result-children>
+                          </atomic-result-section-children>
+                        </template>
+                      </atomic-result-children-template>
+                    </atomic-result-children>
+                  </atomic-result-section-children> -->
+                            </template>
+                        </atomic-result-template>
+                        <!-- </atomic-folded-result-list> -->
+                    </atomic-result-list>
+                    <atomic-query-error></atomic-query-error>
+                    <atomic-no-results></atomic-no-results>
+                </atomic-layout-section>
+                <atomic-layout-section section="pagination">
+                    <atomic-load-more-results></atomic-load-more-results>
+                </atomic-layout-section>
+            </atomic-layout-section>
+        </atomic-search-layout>
+    </atomic-search-interface>
 </body>
-
 </html>
