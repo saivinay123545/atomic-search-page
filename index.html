@@ -27,20 +27,19 @@
             j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
             f.parentNode.insertBefore(j, f);
         })(window, document, 'script', 'dataLayer', 'GTM-M5ZB79RR');
-        /*
-        window.dataLayer.push({
-
-            "event": "coveoEvent",
-            "color": "red"
-
-        })
-        */
+        
+            window.dataLayer.push({
+                "event": "coveoEvent",
+                "color": "red"
+            })
+        
             // const pushToGoogleDataLayer = (payload) => {
             // debugger;
 
             // const externalurl = window.location.href
             // console.log(externalurl);
             // }
+            /*
             var counter = false;
             function pushToGoogleDataLayer(payload){
                     var payLoadValue =  payload.actionCause;
@@ -66,7 +65,7 @@
                 }                   
                 return payload;        
               }
-
+            */
             (async () => {
                 await customElements.whenDefined("atomic-hosted-page");
 
