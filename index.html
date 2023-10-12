@@ -53,20 +53,23 @@
                 debugger;
                 window.dataLayer = window.dataLayer || [];
                 window.dataLayer.push({
-                    event: 'search',
+                    event: payload.actionCause,
                     //eventLabel: query,
                     //eventSource: document.getElementById("search-material-component").getAttribute("event_source"),
                     //eventSourceLabel: document.getElementById("search-material-component").getAttribute("event_source_label"),
                     //searchTerm: query,
-                    //searchResults: totalResults,
-                    searchterm: payload.queryText,
-                    searchType: 'Material Search',
-                    searchCategory: ""
+                    searchResults: payload.numberOfResults,
+                    searchTerm: payload.queryText,
+                    searchType: 'Cross Search',
+                    searchCategory: "Cross Reference Search",
+                    originLevel1: payload.originLevel1,
+                    documentUrl: payload.documentUrl
+
                 });
             }
         }
         const analyticsClientMiddleware = (eventName, payload) => {
-            // console.log("payload", payload.queryText)
+            //console.log("payload", payload)
             counterCheck();
             //To avoid duplicate datalayer function call 
             function counterCheck() {
